@@ -22,7 +22,14 @@ export type IconName =
   | 'bell'
   | 'check'
   | 'close'
-  | 'alert';
+  | 'alert'
+  | 'mail'
+  | 'lock'
+  | 'eye'
+  | 'eye-off'
+  | 'google'
+  | 'arrow-right'
+  | 'user';
 
 export interface IconProps {
   name: IconName;
@@ -132,6 +139,52 @@ export function Icon({
           <Path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" {...common} />
           <Line x1="12" y1="9" x2="12" y2="13" {...common} />
           <Line x1="12" y1="17" x2="12.01" y2="17" {...common} />
+        </>
+      )}
+      {name === 'mail' && (
+        <>
+          <Rect x="3" y="5" width="18" height="14" rx="2" {...common} />
+          <Path d="m3 7 9 6 9-6" {...common} />
+        </>
+      )}
+      {name === 'lock' && (
+        <>
+          <Rect x="4" y="11" width="16" height="10" rx="2" {...common} />
+          <Path d="M8 11V8a4 4 0 0 1 8 0v3" {...common} />
+        </>
+      )}
+      {name === 'eye' && (
+        <>
+          <Path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" {...common} />
+          <Circle cx="12" cy="12" r="3" {...common} />
+        </>
+      )}
+      {name === 'eye-off' && (
+        <>
+          <Path d="M9.9 4.2A10.9 10.9 0 0 1 12 4c6.5 0 10 7 10 7a19 19 0 0 1-3 3.8" {...common} />
+          <Path d="M6.1 6.1A19 19 0 0 0 2 11s3.5 7 10 7a10.7 10.7 0 0 0 5-1.2" {...common} />
+          <Path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" {...common} />
+          <Line x1="3" y1="3" x2="21" y2="21" {...common} />
+        </>
+      )}
+      {name === 'user' && (
+        <>
+          <Circle cx="12" cy="8" r="4" {...common} />
+          <Path d="M4 20a8 8 0 0 1 16 0" {...common} />
+        </>
+      )}
+      {name === 'arrow-right' && (
+        <>
+          <Line x1="4" y1="12" x2="20" y2="12" {...common} />
+          <Polyline points="14 6 20 12 14 18" {...common} />
+        </>
+      )}
+      {name === 'google' && (
+        <>
+          <Path d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3Z" fill="#4285F4" stroke="none" />
+          <Path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z" fill="#34A853" stroke="none" />
+          <Path d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z" fill="#FBBC05" stroke="none" />
+          <Path d="M12 6.1c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 7.8 9.4 6.1 12 6.1Z" fill="#EA4335" stroke="none" />
         </>
       )}
     </Svg>
