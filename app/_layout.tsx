@@ -8,7 +8,7 @@ import { colors } from '@constants/index';
 
 /**
  * Root layout — providers + a headerless stack.
- * The tab group renders its own chrome.
+ * Flow: splash -> onboarding -> (auth) -> (tabs). Screens slide between each other.
  */
 export default function RootLayout() {
   return (
@@ -19,10 +19,13 @@ export default function RootLayout() {
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: colors.background },
-            animation: 'fade',
+            animation: 'slide_from_right',
           }}
         >
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="index" options={{ animation: 'fade' }} />
+          <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+          <Stack.Screen name="(auth)" options={{ animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
         </Stack>
       </SafeAreaProvider>
     </GestureHandlerRootView>
