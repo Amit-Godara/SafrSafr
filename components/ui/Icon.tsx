@@ -29,7 +29,15 @@ export type IconName =
   | 'eye-off'
   | 'google'
   | 'arrow-right'
-  | 'user';
+  | 'user'
+  | 'route'
+  | 'star'
+  | 'clock'
+  | 'navigation'
+  | 'sparkles'
+  | 'file-text'
+  | 'heart'
+  | 'coffee';
 
 export interface IconProps {
   name: IconName;
@@ -185,6 +193,50 @@ export function Icon({
           <Path d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z" fill="#34A853" stroke="none" />
           <Path d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9l3.3-2.6Z" fill="#FBBC05" stroke="none" />
           <Path d="M12 6.1c1.5 0 2.8.5 3.8 1.5l2.8-2.8A10 10 0 0 0 3.1 7.5l3.3 2.6C7.2 7.8 9.4 6.1 12 6.1Z" fill="#EA4335" stroke="none" />
+        </>
+      )}
+      {name === 'route' && (
+        <>
+          <Circle cx="6" cy="19" r="2.5" {...common} />
+          <Circle cx="18" cy="5" r="2.5" {...common} />
+          <Path d="M8.5 19H14a3.5 3.5 0 0 0 0-7H10a3.5 3.5 0 0 1 0-7h5.5" {...common} />
+        </>
+      )}
+      {name === 'star' && (
+        <Path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.6 1-5.8L3.5 9.7l5.9-.9L12 3.5Z" {...common} />
+      )}
+      {name === 'clock' && (
+        <>
+          <Circle cx="12" cy="12" r="9" {...common} />
+          <Polyline points="12 7 12 12 16 14" {...common} />
+        </>
+      )}
+      {name === 'navigation' && (
+        <Path d="M3 11l18-8-8 18-2-8-8-2Z" {...common} />
+      )}
+      {name === 'sparkles' && (
+        <>
+          <Path d="M12 3l1.8 4.7L18.5 9.5 13.8 11.3 12 16l-1.8-4.7L5.5 9.5l4.7-1.8L12 3Z" {...common} />
+          <Path d="M19 14l.9 2.1 2.1.9-2.1.9L19 20l-.9-2.1-2.1-.9 2.1-.9L19 14Z" {...common} />
+        </>
+      )}
+      {name === 'file-text' && (
+        <>
+          <Path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" {...common} />
+          <Polyline points="14 3 14 8 19 8" {...common} />
+          <Line x1="9" y1="13" x2="15" y2="13" {...common} />
+          <Line x1="9" y1="17" x2="13" y2="17" {...common} />
+        </>
+      )}
+      {name === 'heart' && (
+        <Path d="M12 20s-7-4.4-9.3-8.5C1.2 8.5 2.6 5.5 5.6 5.1c1.9-.2 3.4.8 4.4 2.2 1-1.4 2.5-2.4 4.4-2.2 3 .4 4.4 3.4 2.9 6.4C19 15.6 12 20 12 20Z" {...common} />
+      )}
+      {name === 'coffee' && (
+        <>
+          <Path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Z" {...common} />
+          <Path d="M17 9h2.5a2.5 2.5 0 0 1 0 5H17" {...common} />
+          <Line x1="7" y1="2.5" x2="7" y2="5" {...common} />
+          <Line x1="11" y1="2.5" x2="11" y2="5" {...common} />
         </>
       )}
     </Svg>

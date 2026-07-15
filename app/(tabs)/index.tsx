@@ -1,6 +1,6 @@
 import React from 'react';
-import { DesignSystemScreen } from '@screens/DesignSystemScreen';
+import { HomeScreen } from '@screens/HomeScreen';
 
 export default function HomeTab() {
-  return <DesignSystemScreen />;
+  return <HomeScreen />;
 }

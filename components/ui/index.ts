@@ -9,3 +9,4 @@ export * from './Badge';
 export * from './FloatingActionButton';
 export * from './ScreenContainer';
 export * from './FadeSlideView';
+export * from './GlassCard';
