@@ -4,6 +4,7 @@ import { colors, spacing, radius } from '@constants/index';
 import { ThemedText } from '@components/ui/Typography';
 import { Avatar } from '@components/ui/Avatar';
 import { Icon } from '@components/ui/Icon';
+import { BrandLogo } from '@components/ui/BrandLogo';
 
 export interface WelcomeHeaderProps {
   name?: string;
@@ -28,18 +29,21 @@ export function WelcomeHeader({
 
   return (
     <View style={styles.row}>
-      <View style={{ gap: 2 }}>
+      <View style={styles.left}>
+        <BrandLogo size={44} />
+        <View style={{ gap: 2 }}>
         <ThemedText variant="bodySm" color={colors.textMuted}>
           {greeting},
         </ThemedText>
         <ThemedText variant="h2" color={colors.textPrimary}>
           {name} 👋
         </ThemedText>
-        <View style={styles.loc}>
-          <Icon name="map-pin" size={14} color={colors.accent} />
-          <ThemedText variant="caption" color={colors.textSecondary}>
-            {location}
-          </ThemedText>
+          <View style={styles.loc}>
+            <Icon name="map-pin" size={14} color={colors.accent} />
+            <ThemedText variant="caption" color={colors.textSecondary}>
+              {location}
+            </ThemedText>
+          </View>
         </View>
       </View>
 
@@ -64,6 +68,7 @@ export function WelcomeHeader({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  left: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   loc: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
   actions: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   bell: {
