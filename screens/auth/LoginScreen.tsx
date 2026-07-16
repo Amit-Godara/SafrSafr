@@ -10,6 +10,7 @@ import {
 import { Button } from '@components/ui/Button';
 import { ThemedText } from '@components/ui/Typography';
 import { FadeSlideView } from '@components/ui/FadeSlideView';
+import { BrandLogo } from '@components/ui/BrandLogo';
 import { colors, spacing } from '@constants/index';
 import { validateEmail, validatePassword } from '@utils/validation';
 
@@ -49,6 +50,12 @@ export function LoginScreen({
 
   return (
     <AuthScaffold onBack={onBack}>
+      <FadeSlideView delay={40}>
+        <View style={{ alignItems: 'center', marginTop: spacing.md, marginBottom: spacing.sm }}>
+          <BrandLogo size={112} glow />
+        </View>
+      </FadeSlideView>
+
       <FadeSlideView delay={80}>
         <AuthHeader title="Welcome back" subtitle="Sign in to continue staying safe." />
       </FadeSlideView>

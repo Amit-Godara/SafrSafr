@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, Easing } from 'react-native';
 import { AuthBackground } from '@components/auth';
 import { ThemedText } from '@components/ui/Typography';
-import { Icon } from '@components/ui/Icon';
+import { BrandLogo } from '@components/ui/BrandLogo';
 import { colors, spacing, radius, shadow } from '@constants/index';
 
 export interface SplashScreenProps {
@@ -47,7 +47,7 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
             style={[styles.ring, { transform: [{ scale: ringScale }], opacity: ringOpacity }]}
           />
           <Animated.View style={[styles.logo, { opacity, transform: [{ scale }] }]}>
-            <Icon name="shield" size={64} color={colors.background} />
+            <BrandLogo size={120} rounded />
           </Animated.View>
         </View>
         <Animated.View style={{ opacity, alignItems: 'center', gap: spacing.xs }}>
@@ -76,8 +76,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 120,
     height: 120,
-    borderRadius: radius.full,
-    backgroundColor: colors.primary,
+    borderRadius: 34,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadow.glowTeal,
