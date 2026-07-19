@@ -2,3 +2,4 @@ export * from './ui';
 export * from './feedback';
 export * from './navigation';
 export * from './home';
+export * from './safety';
