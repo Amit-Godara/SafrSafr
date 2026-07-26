@@ -3,12 +3,12 @@ import { View } from 'react-native';
 import { Tabs, usePathname, useRouter } from 'expo-router';
 import { BottomNavigation } from '@components/navigation';
 import { TABS } from '@navigation/tabs';
-import { colors } from '@constants/index';
+import { light } from '@constants/lightTheme';
 
 /**
  * Tab group layout.
- * Uses Expo Router <Tabs> for routing but renders the custom glass
- * BottomNavigation from the design system as the tab bar.
+ * Uses Expo Router <Tabs> for routing but renders the custom light-theme
+ * BottomNavigation as the tab bar. Home / Map / Chat / Profile.
  */
 export default function TabsLayout() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function TabsLayout() {
     TABS.find((t) => (t.key === 'index' ? pathname === '/' : pathname.includes(t.key)))?.key ?? 'index';
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={{ flex: 1, backgroundColor: light.background }}>
       <Tabs
         screenOptions={{ headerShown: false }}
         tabBar={() => (
@@ -31,7 +31,7 @@ export default function TabsLayout() {
       >
         <Tabs.Screen name="index" />
         <Tabs.Screen name="map" />
-        <Tabs.Screen name="community" />
+        <Tabs.Screen name="chat" />
         <Tabs.Screen name="profile" />
       </Tabs>
     </View>
