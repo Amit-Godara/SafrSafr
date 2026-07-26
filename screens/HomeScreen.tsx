@@ -288,13 +288,24 @@
 
 
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle as SvgCircle } from 'react-native-svg';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedReaction,
+  withTiming,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withSpring,
+  runOnJS,
+  Easing,
+} from 'react-native-reanimated';
 import { ThemedText } from '@components/ui/Typography';
-import { FadeSlideView } from '@components/ui/FadeSlideView';
 
 /**
  * Local "Guardian" palette for this screen only. Deliberately not pulled
@@ -332,6 +343,142 @@ const C = {
   navInactive: '#8D96B5',
   navActive: '#3A63F3',
 };
+
+/* ======================================================================= */
+/* Reusable animation primitives — every card/button/entrance in this file */
+/* is built from these few hooks/components so animation logic isn't      */
+/* duplicated per section.                                                */
+/* ======================================================================= */
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/**
+ * useOscillate — a value that continuously ping-pongs between min and max
+ * forever. Powers breathing, floating, pulsing, and glow effects; each
+ * call site just decides how to apply the value (scale, translateY,
+ * opacity, translateX...).
+ */
+function useOscillate(min: number, max: number, duration: number, delay = 0) {
+  const value = useSharedValue(min);
+  useEffect(() => {
+    value.value = withDelay(
+      delay,
+      withRepeat(withTiming(max, { duration, easing: Easing.inOut(Easing.ease) }), -1, true),
+    );
+  }, []);
+  return value;
+}
+
+/**
+ * Reveal — staggered entrance animation (fade + translateY + optional
+ * scale). Used for every section's "appear" animation with an 80ms
+ * stagger between sections, per the screen-opening spec.
+ */
+function Reveal({
+  children,
+  delay = 0,
+  from = 20,
+  withScale = false,
+  style,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  from?: number;
+  withScale?: boolean;
+  style?: any;
+}) {
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(from);
+  const scale = useSharedValue(withScale ? 0.95 : 1);
+
+  useEffect(() => {
+    const cfg = { duration: 500, easing: Easing.out(Easing.cubic) };
+    opacity.value = withDelay(delay, withTiming(1, cfg));
+    translateY.value = withDelay(delay, withTiming(0, cfg));
+    if (withScale) scale.value = withDelay(delay, withTiming(1, cfg));
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+  }));
+
+  return <Animated.View style={[style, animStyle]}>{children}</Animated.View>;
+}
+
+/**
+ * PressFeedback — wraps any pressable card/button with a scale-down (and
+ * optional shadow-lift) response on press, plus native ripple on Android.
+ * This single component covers "every white card" / "every button" press
+ * behavior (spec items #12 and #20).
+ */
+function PressFeedback({
+  children,
+  onPress,
+  style,
+  pressScale = 0.97,
+  liftShadow = false,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onPress?: () => void;
+  style?: any;
+  pressScale?: number;
+  liftShadow?: boolean;
+  disabled?: boolean;
+}) {
+  const scale = useSharedValue(1);
+  const shadow = useSharedValue(0.06);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    ...(liftShadow
+      ? { shadowOpacity: shadow.value, elevation: 2 + shadow.value * 55 }
+      : null),
+  }));
+
+  const onPressIn = () => {
+    scale.value = withSpring(pressScale, { damping: 16, stiffness: 320 });
+    if (liftShadow) shadow.value = withTiming(0.18, { duration: 150 });
+  };
+  const onPressOut = () => {
+    scale.value = withSpring(1, { damping: 14, stiffness: 260 });
+    if (liftShadow) shadow.value = withTiming(0.06, { duration: 220 });
+  };
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      disabled={disabled}
+      android_ripple={{ color: 'rgba(16,24,40,0.06)' }}
+      style={[style, animStyle]}
+    >
+      {children}
+    </AnimatedPressable>
+  );
+}
+
+/** CountUp — animates a number from 0 to `target` once, on mount. */
+function useCountUp(target: number, duration = 900, delay = 0) {
+  const progress = useSharedValue(0);
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    progress.value = withDelay(
+      delay,
+      withTiming(target, { duration, easing: Easing.out(Easing.cubic) }),
+    );
+  }, [target]);
+
+  useAnimatedReaction(
+    () => progress.value,
+    (value) => runOnJS(setDisplay)(Math.round(value)),
+  );
+
+  return display;
+}
 
 /* ---------------------------------------------------------------------- */
 /* Inline icons — self-contained SVGs so this file has zero dependency on */
@@ -471,6 +618,146 @@ function ChevronRightIcon({ size = 16, color = C.primary }: { size?: number; col
 }
 
 /* ---------------------------------------------------------------------- */
+/* Section-specific animated widgets                                     */
+/* ---------------------------------------------------------------------- */
+
+/** Bell icon: idle shake every 12s + bounce on press. */
+function AnimatedBell({ onPress }: { onPress?: () => void }) {
+  const rotate = useSharedValue(0);
+  const scale = useSharedValue(1);
+
+  useEffect(() => {
+    const shake = () => {
+      rotate.value = withSequence(
+        withTiming(-10, { duration: 90 }),
+        withTiming(10, { duration: 140 }),
+        withTiming(-6, { duration: 110 }),
+        withTiming(6, { duration: 100 }),
+        withTiming(0, { duration: 110 }),
+      );
+    };
+    const interval = setInterval(shake, 12000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotate.value}deg` }, { scale: scale.value }],
+  }));
+
+  const onPressIn = () => {
+    scale.value = withSequence(
+      withTiming(0.9, { duration: 90 }),
+      withTiming(1.05, { duration: 110 }),
+      withTiming(1, { duration: 100 }),
+    );
+  };
+
+  return (
+    <Pressable onPress={onPress} onPressIn={onPressIn} hitSlop={10} style={styles.iconBtn}>
+      <Animated.View style={style}>
+        <BellIcon />
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+/** Settings icon: press scale + slight rotation. */
+function AnimatedSettings({ onPress }: { onPress?: () => void }) {
+  const rotate = useSharedValue(0);
+  const scale = useSharedValue(1);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotate.value}deg` }, { scale: scale.value }],
+  }));
+
+  const onPressIn = () => {
+    rotate.value = withTiming(15, { duration: 125 });
+    scale.value = withTiming(0.9, { duration: 125 });
+  };
+  const onPressOut = () => {
+    rotate.value = withTiming(0, { duration: 125 });
+    scale.value = withTiming(1, { duration: 125 });
+  };
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      hitSlop={10}
+      style={styles.iconBtn}
+    >
+      <Animated.View style={style}>
+        <SettingsIcon />
+      </Animated.View>
+    </Pressable>
+  );
+}
+
+/** The "Good" safety status word: fade + scale + color settle on mount. */
+function SafetyStatusWord({ text, delay }: { text: string; delay: number }) {
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.85);
+
+  useEffect(() => {
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
+    scale.value = withDelay(delay, withTiming(1, { duration: 400, easing: Easing.out(Easing.back(1.4)) }));
+  }, []);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <Animated.View style={style}>
+      <ThemedText variant="bodySm" color={C.primary} style={{ fontWeight: '700' }}>
+        {text}
+      </ThemedText>
+    </Animated.View>
+  );
+}
+
+/** Continuous "breathing" wrapper for the SOS card. */
+function Breathing({ children, style }: { children: React.ReactNode; style?: any }) {
+  const scale = useOscillate(1, 1.015, 1250);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return <Animated.View style={[style, animStyle]}>{children}</Animated.View>;
+}
+
+/** Continuous pulse for the SOS alert icon. */
+function PulseIcon({ children, style }: { children: React.ReactNode; style?: any }) {
+  const scale = useOscillate(1, 1.15, 1000);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return <Animated.View style={[style, animStyle]}>{children}</Animated.View>;
+}
+
+/** Continuous gentle float for the AI Agent card. */
+function Floating({ children, style }: { children: React.ReactNode; style?: any }) {
+  const translateY = useOscillate(0, -4, 1400);
+  const animStyle = useAnimatedStyle(() => ({ transform: [{ translateY: translateY.value }] }));
+  return <Animated.View style={[style, animStyle]}>{children}</Animated.View>;
+}
+
+/** Continuous glow for the lightbulb icon. */
+function Glow({ children, style }: { children: React.ReactNode; style?: any }) {
+  const opacity = useOscillate(0.8, 1, 1500);
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  return <Animated.View style={[style, animStyle]}>{children}</Animated.View>;
+}
+
+/** Looping horizontal nudge for the "Plan a route" arrow. */
+function ArrowLoop() {
+  const translateX = useOscillate(0, 5, 750);
+  const style = useAnimatedStyle(() => ({ transform: [{ translateX: translateX.value }] }));
+  return (
+    <Animated.View style={style}>
+      <ChevronRightIcon size={13} />
+    </Animated.View>
+  );
+}
+
+/* ======================================================================= */
 
 /** Dummy status data (no backend). */
 const LOCATION = 'Delhi';
@@ -489,9 +776,9 @@ export interface HomeScreenProps {
 }
 
 /**
- * HomeScreen — "Guardian" dashboard redesign.
- * Header, location + safety status, Smart SOS banner, AI Agent / Smart
- * Route cards, Nearby Travelers card, and a nightly precautions tip.
+ * HomeScreen — "Guardian" dashboard redesign with a full micro-interaction
+ * pass: staggered entrance, breathing/floating/pulsing idle animations,
+ * and press-scale + shadow-lift feedback on every card and button.
  * Dummy data only, no backend.
  */
 export function HomeScreen({
@@ -503,6 +790,7 @@ export function HomeScreen({
   onSettingsPress,
 }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
+  const travelersCount = useCountUp(NEARBY_TRAVELERS_COUNT, 900, 400);
 
   return (
     <View style={styles.root}>
@@ -515,8 +803,8 @@ export function HomeScreen({
           gap: 16,
         }}
       >
-        {/* Header */}
-        <FadeSlideView delay={0}>
+        {/* Header — fade in + slide down + slight scale */}
+        <Reveal delay={0} from={-12} withScale>
           <View style={styles.headerRow}>
             <View style={styles.brandRow}>
               <View style={styles.brandIcon}>
@@ -528,19 +816,17 @@ export function HomeScreen({
             </View>
 
             <View style={styles.headerActions}>
-              <Pressable onPress={onNotificationsPress} hitSlop={10} style={styles.iconBtn}>
-                <BellIcon />
+              <View>
+                <AnimatedBell onPress={onNotificationsPress} />
                 {HAS_UNREAD_NOTIFICATIONS && <View style={styles.notifDot} />}
-              </Pressable>
-              <Pressable onPress={onSettingsPress} hitSlop={10} style={styles.iconBtn}>
-                <SettingsIcon />
-              </Pressable>
+              </View>
+              <AnimatedSettings onPress={onSettingsPress} />
             </View>
           </View>
-        </FadeSlideView>
+        </Reveal>
 
         {/* Location + status */}
-        <FadeSlideView delay={60}>
+        <Reveal delay={80}>
           <View style={{ gap: 4 }}>
             <View style={styles.locRow}>
               <PinIcon />
@@ -551,92 +837,103 @@ export function HomeScreen({
             <ThemedText variant="title" color={C.textPrimary} style={styles.locationText}>
               {LOCATION}
             </ThemedText>
-            <ThemedText variant="bodySm" color={C.textSecondary}>
-              Safety score around you is{' '}
-              <ThemedText variant="bodySm" color={C.primary} style={{ fontWeight: '700' }}>
-                {SAFETY_STATUS}
+            <View style={styles.statusRow}>
+              <ThemedText variant="bodySm" color={C.textSecondary}>
+                Safety around you is{' '}
               </ThemedText>
-            </ThemedText>
-          </View>
-        </FadeSlideView>
-
-        {/* Smart SOS banner */}
-        <FadeSlideView delay={120}>
-          <LinearGradient
-            colors={['#ff0000', '#fd0000']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.sosCard}
-          >
-            <View style={styles.sosTopRow}>
-              <View style={styles.sosIconWrap}>
-                <AlertTriangleIcon size={18} />
-              </View>
-              <ThemedText variant="caption" color="#FFFFFF" style={styles.sosLabel}>
-                EMERGENCY
-              </ThemedText>
+              <SafetyStatusWord text={SAFETY_STATUS} delay={260} />
             </View>
+          </View>
+        </Reveal>
 
-            <ThemedText variant="title" color="#FFFFFF" style={styles.sosTitle}>
-              Smart SOS
-            </ThemedText>
-            <ThemedText variant="bodySm" color="rgba(255,255,255,0.9)" style={{ marginBottom: 16 }}>
-              One tap to alert emergency contacts and services.
-            </ThemedText>
-
-            <Pressable
-              onPress={onActivateSOS}
-              style={({ pressed }) => [styles.sosBtn, pressed && { opacity: 0.9 }]}
+        {/* Smart SOS banner — continuous breathing + icon pulse + press scale */}
+        <Reveal delay={160}>
+          <Breathing>
+            <LinearGradient
+              colors={['#ff0000', '#fd0000']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.sosCard}
             >
-              <ThemedText variant="label" color="rgb(255, 0, 0)" style={{ fontWeight: '700', backgroundColor: '#FFFFFF', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 12,width: '100%', textAlign: 'center' }}>
-                Activate SOS
+              <View style={styles.sosTopRow}>
+                <PulseIcon style={styles.sosIconWrap}>
+                  <AlertTriangleIcon size={18} />
+                </PulseIcon>
+                <ThemedText variant="caption" color="#FFFFFF" style={styles.sosLabel}>
+                  EMERGENCY
+                </ThemedText>
+              </View>
+
+              <ThemedText variant="title" color="#FFFFFF" style={styles.sosTitle}>
+                Smart SOS
               </ThemedText>
-            </Pressable>
-          </LinearGradient>
-        </FadeSlideView>
+              <ThemedText variant="bodySm" color="rgba(255,255,255,0.9)" style={{ marginBottom: 16 }}>
+                One tap to alert emergency contacts and services.
+              </ThemedText>
+
+              <PressFeedback onPress={onActivateSOS} pressScale={0.94} liftShadow style={styles.sosBtnWrap}>
+                <ThemedText
+                  variant="label"
+                  color="rgb(255, 0, 0)"
+                  style={{
+                    fontWeight: '700',
+                    backgroundColor: '#FFFFFF',
+                    paddingVertical: 8,
+                    paddingHorizontal: 16,
+                    borderRadius: 12,
+                    width: '100%',
+                    textAlign: 'center',
+                  }}
+                >
+                  Activate SOS
+                </ThemedText>
+              </PressFeedback>
+            </LinearGradient>
+          </Breathing>
+        </Reveal>
 
         {/* AI Agent / Smart Route */}
-        <FadeSlideView delay={180}>
-          <View style={styles.grid}>
-            <Pressable onPress={onAIAgentPress} style={styles.gridItem}>
-              <View style={styles.card}>
+        <View style={styles.grid}>
+          <Reveal delay={240} style={styles.gridItem}>
+            <Floating>
+              <PressFeedback onPress={onAIAgentPress} liftShadow style={styles.card}>
                 <View style={styles.cardIconWrap}>
                   <ShieldCheckIcon size={18} color={C.primary} />
                 </View>
-                <ThemedText variant="label" color={C.textPrimary} style={[styles.cardTitle]}>
+                <ThemedText variant="label" color={C.textPrimary} style={styles.cardTitle}>
                   AI Agent
                 </ThemedText>
                 <ThemedText variant="caption" color={C.textSecondary}>
                   Predicts safety score for any location
                 </ThemedText>
-              </View>
-            </Pressable>
+              </PressFeedback>
+            </Floating>
+          </Reveal>
 
-            <View style={styles.gridItem}>
-              <View style={styles.card}>
-                <View style={styles.cardIconWrap}>
-                  <MapIcon size={18} />
-                </View>
-                <ThemedText variant="label" color={C.textPrimary} style={styles.cardTitle}>
-                  Smart Route
-                </ThemedText>
-                <ThemedText variant="caption" color={C.textSecondary}>
-                  Safest path, not just shortest
-                </ThemedText>
-                <Pressable onPress={onPlanRoute} style={styles.planRouteRow}>
-                  <ThemedText variant="caption" color={C.primary} style={{ fontWeight: '700' }}>
-                    Plan a route
-                  </ThemedText>
-                  <ChevronRightIcon size={13} />
-                </Pressable>
+          <Reveal delay={320} style={styles.gridItem}>
+            <PressFeedback liftShadow style={styles.card}>
+              <View style={styles.cardIconWrap}>
+                <MapIcon size={18} />
               </View>
-            </View>
-          </View>
-        </FadeSlideView>
+              <ThemedText variant="label" color={C.textPrimary} style={styles.cardTitle}>
+                Smart Route
+              </ThemedText>
+              <ThemedText variant="caption" color={C.textSecondary}>
+                Safest path, not just shortest
+              </ThemedText>
+              <Pressable onPress={onPlanRoute} style={styles.planRouteRow}>
+                <ThemedText variant="caption" color={C.primary} style={{ fontWeight: '700' }}>
+                  Plan a route
+                </ThemedText>
+                <ArrowLoop />
+              </Pressable>
+            </PressFeedback>
+          </Reveal>
+        </View>
 
         {/* Nearby Travelers */}
-        <FadeSlideView delay={240}>
-          <Pressable onPress={onNearbyTravelersPress} style={styles.card}>
+        <Reveal delay={400}>
+          <PressFeedback onPress={onNearbyTravelersPress} liftShadow style={styles.card}>
             <View style={styles.travelersRow}>
               <View style={styles.cardIconWrap}>
                 <ChatIcon size={18} />
@@ -646,7 +943,7 @@ export function HomeScreen({
                   Nearby Travelers
                 </ThemedText>
                 <ThemedText variant="caption" color={C.textSecondary}>
-                  {NEARBY_TRAVELERS_COUNT} travelers nearby
+                  {travelersCount} travelers nearby
                 </ThemedText>
               </View>
               <View style={styles.chevronBtn}>
@@ -654,20 +951,22 @@ export function HomeScreen({
               </View>
             </View>
 
-            <View style={styles.reportBox}>
-              <ThemedText variant="caption" color={C.textSecondary}>
-                "{LATEST_REPORT}"
-              </ThemedText>
-            </View>
-          </Pressable>
-        </FadeSlideView>
+            <Reveal delay={480} from={10}>
+              <View style={styles.reportBox}>
+                <ThemedText variant="caption" color={C.textSecondary}>
+                  "{LATEST_REPORT}"
+                </ThemedText>
+              </View>
+            </Reveal>
+          </PressFeedback>
+        </Reveal>
 
         {/* Precautions */}
-        <FadeSlideView delay={300}>
-          <View style={[styles.card, styles.precautionsRow]}>
-            <View style={styles.cardIconWrap}>
+        <Reveal delay={480}>
+          <PressFeedback style={[styles.card, styles.precautionsRow]}>
+            <Glow style={styles.cardIconWrap}>
               <LightbulbIcon size={18} />
-            </View>
+            </Glow>
             <View style={{ flex: 1 }}>
               <ThemedText variant="label" color={C.textPrimary} style={styles.cardTitle}>
                 Precautions for tonight
@@ -676,8 +975,8 @@ export function HomeScreen({
                 Stay alert and keep your phone charged.
               </ThemedText>
             </View>
-          </View>
-        </FadeSlideView>
+          </PressFeedback>
+        </Reveal>
       </ScrollView>
     </View>
   );
@@ -709,6 +1008,7 @@ const styles = StyleSheet.create({
   },
   locRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   locationText: { fontSize: 26, fontWeight: '800' },
+  statusRow: { flexDirection: 'row', alignItems: 'center' },
   sosCard: { borderRadius: 24, padding: 22 },
   sosTopRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
   sosIconWrap: {
@@ -721,13 +1021,7 @@ const styles = StyleSheet.create({
   },
   sosLabel: { fontWeight: '700', letterSpacing: 1 },
   sosTitle: { fontSize: 24, fontWeight: '800', marginBottom: 6 },
-  sosBtn: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 999,
-  },
+  sosBtnWrap: { alignSelf: 'stretch', borderRadius: 12 },
   grid: { flexDirection: 'row', gap: 12 },
   gridItem: { flex: 1 },
   card: {
