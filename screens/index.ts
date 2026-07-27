@@ -4,3 +4,5 @@ export * from './DesignSystemScreen';
 export * from './PlaceholderScreen';
 export * from './auth';
 export * from './AIAssistantScreen';
+export * from './MapScreen';
+export * from './SOSScreen';
