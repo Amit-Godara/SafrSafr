@@ -6,3 +6,5 @@ export * from './auth';
 export * from './AIAssistantScreen';
 export * from './MapScreen';
 export * from './SOSScreen';
+export * from './ChatListScreen';
+export * from './PersonChatScreen';

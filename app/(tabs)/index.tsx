@@ -10,7 +10,7 @@ export default function HomeTab() {
       onAIAgentPress={() => router.push('/ai-assistant')} // TODO: swap to merged Agent+Chat screen (Step 2)
       onActivateSOS={() => router.push('/sos')}
       onPlanRoute={() => {}} // TODO: build Plan Route screen
-      onNearbyTravelersPress={() => {}} // TODO: build Nearby Travelers screen
+      onNearbyTravelersPress={() => router.push('/nearby-travelers')}
       onNotificationsPress={() => {}} // TODO: build Notifications screen
       onSettingsPress={() => {}} // TODO: build Settings screen
     />
