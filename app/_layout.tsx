@@ -4,7 +4,8 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { colors } from '@constants/index';
+import { light } from '@constants/lightTheme';
+import { TravelersProvider } from '../contexts/TravelersContext';
 
 /**
  * Root layout — providers + a headerless stack.
@@ -14,20 +15,25 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
-            animation: 'slide_from_right',
-          }}
-        >
-          <Stack.Screen name="index" options={{ animation: 'fade' }} />
-          <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
-          <Stack.Screen name="(auth)" options={{ animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-          <Stack.Screen name="safety-score" options={{ animation: 'slide_from_right' }} />
-        </Stack>
+        <TravelersProvider>
+          <StatusBar style="dark" />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: light.background },
+              animation: 'slide_from_right',
+            }}
+          >
+            <Stack.Screen name="index" options={{ animation: 'fade' }} />
+            <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+            <Stack.Screen name="(auth)" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+            <Stack.Screen name="safety-score" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ai-assistant" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="sos" options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="nearby-travelers" options={{ animation: 'slide_from_right' }} />
+          </Stack>
+        </TravelersProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
