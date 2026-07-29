@@ -7,7 +7,7 @@ export default function ProfileTab() {
 
   return (
     <ProfileScreen
-      onMyTrips={() => {}} // TODO: build My Trips screen
+      onMyTrips={() => router.push('/my-trips')}
       onEmergencyContacts={() => {}} // TODO: build Emergency Contacts screen
       onSettings={() => {}} // TODO: build Settings screen
       onPrivacy={() => {}} // TODO: build Privacy screen
