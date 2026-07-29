@@ -243,6 +243,7 @@ const CATEGORY_COLOR: Record<PinCategory, string> = {
 
 export interface MapScreenProps {
   onSOS?: () => void;
+  onPlanRoute?: () => void;
 }
 
 /**
@@ -252,7 +253,7 @@ export interface MapScreenProps {
  * backend — everything is static dummy data, but pins are interactive
  * and update the bottom card.
  */
-export function MapScreen({ onSOS }: MapScreenProps) {
+export function MapScreen({ onSOS, onPlanRoute }: MapScreenProps) {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
@@ -403,7 +404,7 @@ export function MapScreen({ onSOS }: MapScreenProps) {
         <PressScale onPress={() => setLayersOpen((o) => !o)} style={styles.fab}>
           <LayersIcon />
         </PressScale>
-        <PressScale onPress={() => {}} style={styles.fab}>
+        <PressScale onPress={onPlanRoute} style={styles.fab}>
           <NavigationIcon />
         </PressScale>
         <PressScale onPress={() => setSelectedPin(null)} style={styles.fab}>
