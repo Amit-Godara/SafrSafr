@@ -10,3 +10,4 @@ export * from './ChatListScreen';
 export * from './PersonChatScreen';
 export * from './RoutePlannerScreen';
 export * from './NavigationScreen';
+export * from './ProfileScreen';
