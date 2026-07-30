@@ -12,7 +12,7 @@ export default function HomeTab() {
       onPlanRoute={() => router.push('/route-planner')}
       onNearbyTravelersPress={() => router.push('/nearby-travelers')}
       onNotificationsPress={() => {}} // TODO: build Notifications screen
-      onSettingsPress={() => {}} // TODO: build Settings screen
+      onSettingsPress={() => router.push('/settings')}
     />
   );
 }
