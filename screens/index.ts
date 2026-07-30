@@ -12,3 +12,4 @@ export * from './RoutePlannerScreen';
 export * from './NavigationScreen';
 export * from './ProfileScreen';
 export * from './EmergencyContactsScreen';
+export * from './SettingsScreen';
