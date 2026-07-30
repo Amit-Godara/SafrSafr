@@ -10,7 +10,7 @@ export default function ProfileTab() {
       onMyTrips={() => router.push('/my-trips')}
       onEmergencyContacts={() => router.push('/emergency-contacts')}
       onSettings={() => router.push('/settings')}
-      onPrivacy={() => {}} // TODO: build Privacy screen
+      onPrivacy={() => router.push('/privacy')}
       onHelp={() => {}} // TODO: build Help screen
       onLogout={() => router.replace('/')}
     />
