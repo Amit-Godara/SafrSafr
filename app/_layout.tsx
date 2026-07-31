@@ -32,6 +32,9 @@ export default function RootLayout() {
             <Stack.Screen name="ai-assistant" options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="sos" options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="nearby-travelers" options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="my-trips" />
+            <Stack.Screen name="emergency-contacts" />
+            <Stack.Screen name="settings" />
           </Stack>
         </TravelersProvider>
       </SafeAreaProvider>
