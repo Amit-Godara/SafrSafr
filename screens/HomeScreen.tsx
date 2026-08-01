@@ -501,7 +501,7 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const { hasUnread } = useNotifications();
-  const travelersCount = useCountUp(NEARBY_TRAVELERS_COUNT, 900, 400);
+  const travelersCount = NEARBY_TRAVELERS_COUNT;
 
   return (
     <View style={styles.root}>
