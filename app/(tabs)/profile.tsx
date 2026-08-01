@@ -12,7 +12,7 @@ export default function ProfileTab() {
       onSettings={() => router.push('/settings')}
       onPrivacy={() => router.push('/privacy')}
       onHelp={() => router.push('/help')}
-      onLogout={() => router.replace('/')}
+      onLogout={() => router.replace('/login')}
     />
   );
 }

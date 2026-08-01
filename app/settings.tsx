@@ -7,7 +7,7 @@ export default function SettingsRoute() {
   return (
     <SettingsScreen
       onBack={() => router.back()}
-      onLogout={() => router.replace('/')}
+      onLogout={() => router.replace('/login')}
     />
   );
 }
