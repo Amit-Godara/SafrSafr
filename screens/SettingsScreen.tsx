@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, TextInput, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, TextInput, StyleSheet, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle } from 'react-native-svg';
 import Animated, {
@@ -62,6 +62,16 @@ function LogoutIcon({ size = 18, color = C.danger }: { size?: number; color?: st
         strokeLinejoin="round"
         fill="none"
       />
+    </Svg>
+  );
+}
+
+function AlertTriangleIcon({ size = 26, color = C.danger }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 3.5l9.5 16.5H2.5L12 3.5z" stroke={color} strokeWidth={1.7} strokeLinejoin="round" fill="none" />
+      <Path d="M12 9.5v5" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <SvgCircle cx={12} cy={17} r={1} fill={color} />
     </Svg>
   );
 }
@@ -258,6 +268,12 @@ export interface SettingsScreenProps {
  */
 export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
   const insets = useSafeAreaInsets();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(false);
+    onLogout?.();
+  };
 
   // Account
   const [name, setName] = useState('Amit Sharma');
@@ -333,7 +349,7 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
               </View>
             </ExpandableRow>
 
-            <Pressable onPress={onLogout} style={styles.row}>
+            <Pressable onPress={() => setShowLogoutConfirm(true)} style={styles.row}>
               <View style={styles.logoutIconWrap}>
                 <LogoutIcon />
               </View>
@@ -382,6 +398,36 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
           </View>
         </Reveal>
       </ScrollView>
+
+      {/* Logout confirmation dialog */}
+      <Modal visible={showLogoutConfirm} transparent animationType="fade" onRequestClose={() => setShowLogoutConfirm(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setShowLogoutConfirm(false)}>
+          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalIconWrap}>
+              <AlertTriangleIcon />
+            </View>
+            <ThemedText variant="title" color={C.textPrimary} style={{ fontWeight: '800', marginTop: 12 }}>
+              Log Out?
+            </ThemedText>
+            <ThemedText variant="bodySm" color={C.textMuted} style={{ textAlign: 'center', marginTop: 6 }}>
+              Are you sure you want to log out of your account?
+            </ThemedText>
+
+            <View style={styles.modalActions}>
+              <Pressable onPress={() => setShowLogoutConfirm(false)} style={styles.modalCancelBtn}>
+                <ThemedText variant="label" color={C.textSecondary} style={{ fontWeight: '700' }}>
+                  Cancel
+                </ThemedText>
+              </Pressable>
+              <Pressable onPress={confirmLogout} style={styles.modalLogoutBtn}>
+                <ThemedText variant="label" color="#FFFFFF" style={{ fontWeight: '700' }}>
+                  Log Out
+                </ThemedText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -468,6 +514,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   radioInner: { width: 11, height: 11, borderRadius: 5.5 },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(16,24,40,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: C.card,
+    borderRadius: 24,
+    paddingVertical: 26,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+  },
+  modalIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: C.dangerSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalActions: { flexDirection: 'row', gap: 10, marginTop: 22, width: '100%' },
+  modalCancelBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#F3F4F8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalLogoutBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: C.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 export default SettingsScreen;
