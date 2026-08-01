@@ -11,7 +11,7 @@ export default function HomeTab() {
       onActivateSOS={() => router.push('/sos')}
       onPlanRoute={() => router.push('/route-planner')}
       onNearbyTravelersPress={() => router.push('/nearby-travelers')}
-      onNotificationsPress={() => {}} // TODO: build Notifications screen
+      onNotificationsPress={() => router.push('/notifications')}
       onSettingsPress={() => router.push('/settings')}
     />
   );
