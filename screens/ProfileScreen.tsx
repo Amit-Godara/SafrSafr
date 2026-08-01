@@ -3,6 +3,7 @@ import { View, ScrollView, Pressable, StyleSheet, Modal } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle, Rect } from 'react-native-svg';
 import { ThemedText } from '@components/ui/Typography';
+import { ThemeToggleButton } from '@components/profile/ThemeToggleButton';
 
 const C = {
   page: '#F7F8FC',
@@ -279,6 +280,7 @@ export function ProfileScreen({
 }: ProfileScreenProps) {
   const insets = useSafeAreaInsets();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isDark, setIsDark] = useState(false); // UI toggle only — no real theme switch yet
 
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
@@ -293,6 +295,10 @@ export function ProfileScreen({
       >
         {/* Profile header */}
         <View style={styles.profileHeader}>
+          <View style={styles.themeToggleWrap}>
+            <ThemeToggleButton isDark={isDark} onToggle={() => setIsDark((d) => !d)} />
+          </View>
+
           <View style={styles.avatarWrap}>
             <View style={styles.avatar}>
               <UserIcon />
@@ -390,7 +396,12 @@ export function ProfileScreen({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.page },
-  profileHeader: { alignItems: 'center' },
+  profileHeader: { alignItems: 'center', position: 'relative' },
+  themeToggleWrap: {
+    position: 'absolute',
+    top: 0,
+    right: 22,
+  },
   avatarWrap: { width: 96, height: 96 },
   avatar: {
     width: 96,
