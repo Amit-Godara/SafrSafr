@@ -203,8 +203,8 @@ const TRIP_HISTORY = [
 ];
 
 const SAVED_ROUTES = [
-  { id: 'r1', name: 'Home → College', distance: '6.8 km', duration: '22 min' },
-  { id: 'r2', name: 'Office → Gym', distance: '2.4 km', duration: '9 min' },
+  { id: 'r1', name: 'Home → College', source: 'Home', destination: 'College', distance: '6.8 km', duration: '22 min' },
+  { id: 'r2', name: 'Office → Gym', source: 'Office', destination: 'Gym', distance: '2.4 km', duration: '9 min' },
 ];
 
 const FAVORITE_PLACES = [
@@ -258,14 +258,17 @@ function EmptyState({ label }: { label: string }) {
 
 export interface MyTripsScreenProps {
   onBack?: () => void;
+  onNavigateRoute?: (route: { source: string; destination: string; distance: string; duration: string }) => void;
 }
 
 /**
  * MyTripsScreen — Trip History / Saved Routes / Favorite Places / Recent
- * Searches, switchable via a horizontal tab row. Light theme matching
- * Home. Dummy data only, no backend.
+ * Searches, switchable via a horizontal tab row. Tapping the Navigate
+ * button on a Saved Route opens it on the Map/Navigation screen with a
+ * dummy route drawn between the two points. Light theme matching Home.
+ * Dummy data only, no backend.
  */
-export function MyTripsScreen({ onBack }: MyTripsScreenProps) {
+export function MyTripsScreen({ onBack, onNavigateRoute }: MyTripsScreenProps) {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<TabKey>('history');
 
@@ -342,7 +345,17 @@ export function MyTripsScreen({ onBack }: MyTripsScreenProps) {
                       </ThemedText>
                     </View>
                   </View>
-                  <PressFeedback style={styles.navigateBtn}>
+                  <PressFeedback
+                    onPress={() =>
+                      onNavigateRoute?.({
+                        source: r.source,
+                        destination: r.destination,
+                        distance: r.distance,
+                        duration: r.duration,
+                      })
+                    }
+                    style={styles.navigateBtn}
+                  >
                     <NavigateIcon />
                   </PressFeedback>
                 </View>
