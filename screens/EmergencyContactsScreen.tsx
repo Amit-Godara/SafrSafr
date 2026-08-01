@@ -124,6 +124,25 @@ function AlertIcon({ size = 16, color = C.danger }: { size?: number; color?: str
   );
 }
 
+function ShieldIcon({ size = 18, color = '#FFFFFF' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 2l7 3v6c0 4.8-3 8.7-7 10-4-1.3-7-5.2-7-10V5l7-3z" fill={color} opacity={0.95} />
+    </Svg>
+  );
+}
+
+function HeartIcon({ size = 18, color = '#FFFFFF' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 20s-7.5-4.6-9.7-9.1C.8 7.6 2.4 4.5 5.6 4c2-.3 3.7.7 4.9 2.3l1.5 2 1.5-2C14.7 4.7 16.4 3.7 18.4 4c3.2.5 4.8 3.6 3.3 6.9C19.5 15.4 12 20 12 20z"
+        fill={color}
+      />
+    </Svg>
+  );
+}
+
 /* ---------------------------------------------------------------------- */
 /* Reusable animation primitives                                         */
 /* ---------------------------------------------------------------------- */
@@ -184,6 +203,20 @@ const INITIAL_CONTACTS: Contact[] = [
   { id: 'c1', name: 'Mom', relation: 'Mother', phone: '+91 98765 43210' },
   { id: 'c2', name: 'Rahul Sharma', relation: 'Brother', phone: '+91 91234 56789' },
   { id: 'c3', name: 'Priya Verma', relation: 'Friend', phone: '+91 99887 66554' },
+];
+
+interface Helpline {
+  id: string;
+  name: string;
+  phone: string;
+  color: string;
+  icon: (props: { size?: number; color?: string }) => React.ReactElement;
+}
+
+const HELPLINES: Helpline[] = [
+  { id: 'h1', name: 'Police', phone: '100', color: C.primary, icon: ShieldIcon },
+  { id: 'h2', name: 'Ambulance', phone: '108', color: '#E53935', icon: MedicalIcon },
+  { id: 'h3', name: 'Women Helpline', phone: '1091', color: '#D6336C', icon: HeartIcon },
 ];
 
 const DEFAULT_SOS_MESSAGE =
@@ -290,6 +323,41 @@ export function EmergencyContactsScreen({ onBack }: EmergencyContactsScreenProps
         {/* Manage Emergency Contacts */}
         {tab === 'contacts' && (
           <>
+            <Reveal delay={0}>
+              <View style={{ gap: 8 }}>
+                <ThemedText variant="caption" color={C.textMuted} style={{ fontWeight: '700', marginLeft: 4 }}>
+                  EMERGENCY HELPLINES
+                </ThemedText>
+                <View style={styles.card}>
+                  {HELPLINES.map((h, i) => {
+                    const Icon = h.icon;
+                    return (
+                      <View key={h.id} style={[styles.contactRow, i < HELPLINES.length - 1 && styles.helplineRowBorder]}>
+                        <View style={[styles.avatar, { backgroundColor: h.color }]}>
+                          <Icon />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                          <ThemedText variant="label" color={C.textPrimary} style={{ fontWeight: '700' }}>
+                            {h.name}
+                          </ThemedText>
+                          <ThemedText variant="caption" color={C.textMuted}>
+                            {h.phone}
+                          </ThemedText>
+                        </View>
+                        <PressFeedback style={[styles.iconBtn, { backgroundColor: C.successSoft }]}>
+                          <PhoneIcon />
+                        </PressFeedback>
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+            </Reveal>
+
+            <ThemedText variant="caption" color={C.textMuted} style={{ fontWeight: '700', marginLeft: 4, marginTop: 4 }}>
+              MY CONTACTS
+            </ThemedText>
+
             {contacts.map((c, i) => (
               <Reveal key={c.id} delay={i * 70}>
                 <View style={styles.card}>
@@ -483,6 +551,7 @@ const styles = StyleSheet.create({
   },
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
   contactRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  helplineRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border, paddingBottom: 12, marginBottom: 12 },
   avatar: {
     width: 42,
     height: 42,
