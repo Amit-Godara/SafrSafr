@@ -123,6 +123,24 @@ function CheckIcon({ size = 15, color = '#FFFFFF' }: { size?: number; color?: st
   );
 }
 
+function DeviceIcon({ size = 16, color = C.primary }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x={6} y={2.5} width={12} height={19} rx={2.2} stroke={color} strokeWidth={1.7} fill="none" />
+      <Path d="M11 18.5h2" stroke={color} strokeWidth={1.7} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function ClockIcon({ size = 14, color = C.textMuted }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <SvgCircle cx={12} cy={12} r={9} stroke={color} strokeWidth={1.6} fill="none" />
+      <Path d="M12 7v5l3.5 2" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
 /* ---------------------------------------------------------------------- */
 /* Reusable animation primitives — same pattern used elsewhere.          */
 /* ---------------------------------------------------------------------- */
@@ -250,6 +268,20 @@ const INITIAL_BLOCKED: BlockedUser[] = [
   { id: 'b2', name: 'Unknown User', initials: '?', avatarColor: '#94A3B8' },
 ];
 
+interface Session {
+  id: string;
+  device: string;
+  location: string;
+  lastActive: string;
+}
+
+const CURRENT_DEVICE = { name: 'Pixel 8', lastLogin: 'Today, 11:31 AM' };
+
+const OTHER_SESSIONS: Session[] = [
+  { id: 's1', device: 'iPhone 14 Pro', location: 'Mumbai, India', lastActive: '2 days ago' },
+  { id: 's2', device: 'Chrome on Windows', location: 'Delhi, India', lastActive: '5 days ago' },
+];
+
 export interface PrivacyScreenProps {
   onBack?: () => void;
   onAccountDeleted?: () => void;
@@ -270,6 +302,10 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
   const [dataSharing, setDataSharing] = useState(true);
   const [blocked, setBlocked] = useState<BlockedUser[]>(INITIAL_BLOCKED);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [sessions, setSessions] = useState<Session[]>(OTHER_SESSIONS);
+  const [manageOpen, setManageOpen] = useState(false);
+
+  const logOutSession = (id: string) => setSessions((prev) => prev.filter((s) => s.id !== id));
 
   const unblock = (id: string) => setBlocked((prev) => prev.filter((u) => u.id !== id));
 
@@ -351,8 +387,81 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
           </View>
         </Reveal>
 
-        {/* Location Privacy */}
+        {/* Active Sessions */}
         <Reveal delay={60}>
+          <SectionTitle>Active Sessions</SectionTitle>
+          <View style={styles.card}>
+            <View style={manageOpen ? styles.rowBorder : undefined}>
+              <View style={styles.sessionCurrentRow}>
+                <View style={styles.iconWrap}>
+                  <DeviceIcon />
+                </View>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <View style={styles.currentDeviceHeaderRow}>
+                    <ThemedText variant="bodySm" color={C.textPrimary} style={{ fontWeight: '700' }}>
+                      Current Device
+                    </ThemedText>
+                    <View style={styles.thisDeviceBadge}>
+                      <ThemedText variant="caption" color={C.primary} style={{ fontWeight: '700' }}>
+                        This Device
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <ThemedText variant="caption" color={C.textMuted}>
+                    {CURRENT_DEVICE.name}
+                  </ThemedText>
+                  <View style={styles.lastLoginRow}>
+                    <ClockIcon />
+                    <ThemedText variant="caption" color={C.textMuted}>
+                      Last Login: {CURRENT_DEVICE.lastLogin}
+                    </ThemedText>
+                  </View>
+                </View>
+              </View>
+
+              <Pressable onPress={() => setManageOpen((o) => !o)} style={styles.manageDevicesRow}>
+                <ThemedText variant="caption" color={C.primary} style={{ fontWeight: '700' }}>
+                  Manage Devices {manageOpen ? '' : `(${sessions.length})`}
+                </ThemedText>
+                <ChevronDownIcon rotated={manageOpen} color={C.primary} />
+              </Pressable>
+            </View>
+
+            {manageOpen && (
+              <View style={styles.expandBody}>
+                {sessions.length === 0 ? (
+                  <ThemedText variant="caption" color={C.textMuted} style={{ paddingVertical: 8 }}>
+                    No other active sessions.
+                  </ThemedText>
+                ) : (
+                  sessions.map((s, i) => (
+                    <View key={s.id} style={[styles.sessionRow, i < sessions.length - 1 && styles.rowBorder]}>
+                      <View style={styles.iconWrap}>
+                        <DeviceIcon color={C.textSecondary} />
+                      </View>
+                      <View style={{ flex: 1, gap: 2 }}>
+                        <ThemedText variant="bodySm" color={C.textPrimary} style={{ fontWeight: '600' }}>
+                          {s.device}
+                        </ThemedText>
+                        <ThemedText variant="caption" color={C.textMuted}>
+                          {s.location} • Active {s.lastActive}
+                        </ThemedText>
+                      </View>
+                      <PressFeedback onPress={() => logOutSession(s.id)} style={styles.logOutSessionBtn}>
+                        <ThemedText variant="caption" color={C.danger} style={{ fontWeight: '700' }}>
+                          Log Out
+                        </ThemedText>
+                      </PressFeedback>
+                    </View>
+                  ))
+                )}
+              </View>
+            )}
+          </View>
+        </Reveal>
+
+        {/* Location Privacy */}
+        <Reveal delay={110}>
           <SectionTitle>Location Privacy</SectionTitle>
           <View style={styles.card}>
             <SelectorRow
@@ -366,7 +475,7 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
         </Reveal>
 
         {/* Data Sharing */}
-        <Reveal delay={120}>
+        <Reveal delay={170}>
           <SectionTitle>Data Sharing</SectionTitle>
           <View style={styles.card}>
             <ToggleRow
@@ -380,7 +489,7 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
         </Reveal>
 
         {/* Blocked Users */}
-        <Reveal delay={180}>
+        <Reveal delay={230}>
           <SectionTitle>Blocked Users</SectionTitle>
           <View style={styles.card}>
             {blocked.length === 0 ? (
@@ -410,7 +519,7 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
         </Reveal>
 
         {/* Danger zone */}
-        <Reveal delay={240}>
+        <Reveal delay={290}>
           <SectionTitle>Danger Zone</SectionTitle>
           <View style={[styles.card, styles.dangerCard]}>
             <View style={styles.dangerHeader}>
@@ -547,6 +656,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#F3F4F8',
+  },
+  sessionCurrentRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 14 },
+  currentDeviceHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  thisDeviceBadge: {
+    backgroundColor: C.primarySoft,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  lastLoginRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2 },
+  manageDevicesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  sessionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12 },
+  logOutSessionBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: C.dangerSoft,
   },
 });
 
