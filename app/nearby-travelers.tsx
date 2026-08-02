@@ -7,7 +7,7 @@ export default function NearbyTravelersRoute() {
   return (
     <NearbyTravelersScreen
       onBack={() => router.back()}
-      onChatWithTraveler={(traveler) => router.push(`/(tabs)/chat/${traveler.id}`)}
+      onChatWithTraveler={(traveler) => router.push(`/conversation/${traveler.id}`)}
     />
   );
 }
