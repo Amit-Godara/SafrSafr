@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Modal, ImageBackground, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle, Rect } from 'react-native-svg';
 import { ThemedText } from '@components/ui/Typography';
 import { ThemeToggleButton } from '@components/profile/ThemeToggleButton';
+// import ProfileBackground from '../assets/images/profile-bg.png';
 
 const C = {
   page: '#F7F8FC',
@@ -288,7 +289,17 @@ export function ProfileScreen({
   };
 
   return (
-    <View style={styles.root}>
+    <ImageBackground
+      source={require('../assets/images/background/watercolor-bg.png')}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(255,255,255,0.15)',
+        }}
+      >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 16, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 24, gap: 16 }}
@@ -390,12 +401,13 @@ export function ProfileScreen({
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.page },
+  root: { flex: 1 },
   profileHeader: { alignItems: 'center', position: 'relative' },
   themeToggleWrap: {
     position: 'absolute',
@@ -499,6 +511,16 @@ const styles = StyleSheet.create({
     backgroundColor: C.danger,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  airplane: {
+    position: 'absolute',
+    top: 40,
+    right: 15,
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
+    opacity: 0.9,
+    zIndex: 1,
   },
 });
 
