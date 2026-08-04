@@ -11,7 +11,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { ThemedText } from '@components/ui/Typography';
-
+console.log("🔥 APP EMERGENCY CONTACTS");
 const C = {
   page: '#F7F8FC',
   card: '#FFFFFF',

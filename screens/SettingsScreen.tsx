@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, TextInput, StyleSheet, Modal } from 'react-native';
+import { View, ScrollView, Pressable, TextInput, StyleSheet, Modal , ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle } from 'react-native-svg';
 import Animated, {
@@ -299,7 +299,12 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
   const [locationAccuracy, setLocationAccuracy] = useState('High');
 
   return (
-    <View style={styles.root}>
+    <ImageBackground
+      source={require('../assets/images/background/watercolor-bg.png')}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={onBack} hitSlop={10} style={styles.backBtn}>
@@ -429,11 +434,12 @@ export function SettingsScreen({ onBack, onLogout }: SettingsScreenProps) {
         </Pressable>
       </Modal>
     </View>
+      </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.page },
+  root: { flex: 1, backgroundColor: 'rgba(255,255,255,0.15)' },
   header: {
     backgroundColor: C.card,
     paddingHorizontal: 16,
