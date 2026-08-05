@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet , ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle, Rect } from 'react-native-svg';
 import Animated, {
@@ -203,8 +203,8 @@ const TRIP_HISTORY = [
 ];
 
 const SAVED_ROUTES = [
-  { id: 'r1', name: 'Home → College', distance: '6.8 km', duration: '22 min' },
-  { id: 'r2', name: 'Office → Gym', distance: '2.4 km', duration: '9 min' },
+  { id: 'r1', name: 'Home → College', source: 'Home', destination: 'College', distance: '6.8 km', duration: '22 min' },
+  { id: 'r2', name: 'Office → Gym', source: 'Office', destination: 'Gym', distance: '2.4 km', duration: '9 min' },
 ];
 
 const FAVORITE_PLACES = [
@@ -258,19 +258,27 @@ function EmptyState({ label }: { label: string }) {
 
 export interface MyTripsScreenProps {
   onBack?: () => void;
+  onNavigateRoute?: (route: { source: string; destination: string; distance: string; duration: string }) => void;
 }
 
 /**
  * MyTripsScreen — Trip History / Saved Routes / Favorite Places / Recent
- * Searches, switchable via a horizontal tab row. Light theme matching
- * Home. Dummy data only, no backend.
+ * Searches, switchable via a horizontal tab row. Tapping the Navigate
+ * button on a Saved Route opens it on the Map/Navigation screen with a
+ * dummy route drawn between the two points. Light theme matching Home.
+ * Dummy data only, no backend.
  */
-export function MyTripsScreen({ onBack }: MyTripsScreenProps) {
+export function MyTripsScreen({ onBack, onNavigateRoute }: MyTripsScreenProps) {
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<TabKey>('history');
 
   return (
-    <View style={styles.root}>
+    <ImageBackground
+      source={require('../assets/images/background/watercolor-bg.png')}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerRow}>
           <Pressable onPress={onBack} hitSlop={10} style={styles.backBtn}>
@@ -342,7 +350,17 @@ export function MyTripsScreen({ onBack }: MyTripsScreenProps) {
                       </ThemedText>
                     </View>
                   </View>
-                  <PressFeedback style={styles.navigateBtn}>
+                  <PressFeedback
+                    onPress={() =>
+                      onNavigateRoute?.({
+                        source: r.source,
+                        destination: r.destination,
+                        distance: r.distance,
+                        duration: r.duration,
+                      })
+                    }
+                    style={styles.navigateBtn}
+                  >
                     <NavigateIcon />
                   </PressFeedback>
                 </View>
@@ -377,11 +395,12 @@ export function MyTripsScreen({ onBack }: MyTripsScreenProps) {
           ))}
       </ScrollView>
     </View>
+      </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.page },
+  root: { flex: 1, backgroundColor: 'rgba(255,255,255,0.15)' },
   header: {
     backgroundColor: C.card,
     paddingBottom: 12,

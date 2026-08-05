@@ -50,7 +50,14 @@ export default function RootLayout() {
               <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
               <Stack.Screen name="old-notifications" options={{ animation: 'slide_from_right' }} />
+<<<<<<< HEAD
               <Stack.Screen name="conversation/[id]" options={{ animation: 'slide_from_right' }} />
+=======
+              <Stack.Screen
+                name="conversation/[id]"
+                options={{ animation: 'slide_from_right' }}
+              />
+>>>>>>> feature/profile
             </Stack>
           </NotificationsProvider>
         </TravelersProvider>

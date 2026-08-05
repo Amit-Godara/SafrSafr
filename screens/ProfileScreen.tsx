@@ -1,8 +1,10 @@
-import React from 'react';
-import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, ScrollView, Pressable, StyleSheet, Modal, ImageBackground, Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle, Rect } from 'react-native-svg';
 import { ThemedText } from '@components/ui/Typography';
+import { ThemeToggleButton } from '@components/profile/ThemeToggleButton';
+// import ProfileBackground from '../assets/images/profile-bg.png';
 
 const C = {
   page: '#F7F8FC',
@@ -167,6 +169,16 @@ function LogoutIcon({ size = 18, color = C.danger }: { size?: number; color?: st
   );
 }
 
+function AlertTriangleIcon({ size = 26, color = C.danger }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 3.5l9.5 16.5H2.5L12 3.5z" stroke={color} strokeWidth={1.7} strokeLinejoin="round" fill="none" />
+      <Path d="M12 9.5v5" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <SvgCircle cx={12} cy={17} r={1} fill={color} />
+    </Svg>
+  );
+}
+
 function ChevronRightIcon({ size = 16, color = C.textMuted }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -268,15 +280,36 @@ export function ProfileScreen({
   onEditPicture,
 }: ProfileScreenProps) {
   const insets = useSafeAreaInsets();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isDark, setIsDark] = useState(false); // UI toggle only — no real theme switch yet
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(false);
+    onLogout?.();
+  };
 
   return (
-    <View style={styles.root}>
+    <ImageBackground
+      source={require('../assets/images/background/watercolor-bg.png')}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(255,255,255,0.15)',
+        }}
+      >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 16, paddingTop: insets.top + 20, paddingBottom: insets.bottom + 24, gap: 16 }}
       >
         {/* Profile header */}
         <View style={styles.profileHeader}>
+          <View style={styles.themeToggleWrap}>
+            <ThemeToggleButton isDark={isDark} onToggle={() => setIsDark((d) => !d)} />
+          </View>
+
           <View style={styles.avatarWrap}>
             <View style={styles.avatar}>
               <UserIcon />
@@ -335,16 +368,52 @@ export function ProfileScreen({
         </View>
 
         <View style={styles.menuCard}>
-          <MenuRow icon={<LogoutIcon />} label="Logout" onPress={onLogout} danger isLast />
+          <MenuRow icon={<LogoutIcon />} label="Logout" onPress={() => setShowLogoutConfirm(true)} danger isLast />
         </View>
       </ScrollView>
-    </View>
+
+      {/* Logout confirmation dialog */}
+      <Modal visible={showLogoutConfirm} transparent animationType="fade" onRequestClose={() => setShowLogoutConfirm(false)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setShowLogoutConfirm(false)}>
+          <Pressable style={styles.modalCard} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalIconWrap}>
+              <AlertTriangleIcon />
+            </View>
+            <ThemedText variant="title" color={C.textPrimary} style={{ fontWeight: '800', marginTop: 12 }}>
+              Log Out?
+            </ThemedText>
+            <ThemedText variant="bodySm" color={C.textMuted} style={{ textAlign: 'center', marginTop: 6 }}>
+              Are you sure you want to log out of your account?
+            </ThemedText>
+
+            <View style={styles.modalActions}>
+              <Pressable onPress={() => setShowLogoutConfirm(false)} style={styles.modalCancelBtn}>
+                <ThemedText variant="label" color={C.textSecondary} style={{ fontWeight: '700' }}>
+                  Cancel
+                </ThemedText>
+              </Pressable>
+              <Pressable onPress={confirmLogout} style={styles.modalLogoutBtn}>
+                <ThemedText variant="label" color="#FFFFFF" style={{ fontWeight: '700' }}>
+                  Log Out
+                </ThemedText>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.page },
-  profileHeader: { alignItems: 'center' },
+  root: { flex: 1 },
+  profileHeader: { alignItems: 'center', position: 'relative' },
+  themeToggleWrap: {
+    position: 'absolute',
+    top: 0,
+    right: 22,
+  },
   avatarWrap: { width: 96, height: 96 },
   avatar: {
     width: 96,
@@ -402,6 +471,57 @@ const styles = StyleSheet.create({
   menuRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
   menuRowBorder: { borderBottomWidth: 1, borderBottomColor: C.border },
   menuIconWrap: { width: 36, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(16,24,40,0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: C.card,
+    borderRadius: 24,
+    paddingVertical: 26,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+  },
+  modalIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: C.dangerSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalActions: { flexDirection: 'row', gap: 10, marginTop: 22, width: '100%' },
+  modalCancelBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#F3F4F8',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalLogoutBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: C.danger,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  airplane: {
+    position: 'absolute',
+    top: 40,
+    right: 15,
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
+    opacity: 0.9,
+    zIndex: 1,
+  },
 });
 
 export default ProfileScreen;
