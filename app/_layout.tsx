@@ -7,6 +7,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { light } from '@constants/lightTheme';
 import { TravelersProvider } from '../contexts/TravelersContext';
 import { NotificationsProvider } from '../contexts/NotificationsContext';
+import { TabBarVisibilityProvider } from '../contexts/TabBarVisibilityContext';
+import { UserProfileProvider } from '../contexts/UserProfileContext';
 
 /**
  * Root layout — providers + a headerless stack.
@@ -18,36 +20,37 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <TravelersProvider>
           <NotificationsProvider>
-            <StatusBar style="dark" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: light.background },
-                animation: 'slide_from_right',
-              }}
-            >
-              <Stack.Screen name="index" options={{ animation: 'fade' }} />
-              <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
-              <Stack.Screen name="(auth)" options={{ animation: 'slide_from_bottom' }} />
-              <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-              <Stack.Screen name="safety-score" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="ai-assistant" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="sos" options={{ animation: 'slide_from_bottom' }} />
-              <Stack.Screen name="nearby-travelers" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="route-planner" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="navigation" options={{ animation: 'fade' }} />
-              <Stack.Screen name="my-trips" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="emergency-contacts" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="privacy" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen name="old-notifications" options={{ animation: 'slide_from_right' }} />
-              <Stack.Screen
-                name="conversation/[id]"
-                options={{ animation: 'slide_from_right' }}
-              />
-            </Stack>
+            <TabBarVisibilityProvider>
+              <UserProfileProvider>
+                <StatusBar style="dark" />
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: light.background },
+                    animation: 'slide_from_right',
+                  }}
+                >
+                  <Stack.Screen name="index" options={{ animation: 'fade' }} />
+                  <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+                  <Stack.Screen name="(auth)" options={{ animation: 'slide_from_bottom' }} />
+                  <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+                  <Stack.Screen name="safety-score" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="ai-assistant" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="sos" options={{ animation: 'slide_from_bottom' }} />
+                  <Stack.Screen name="nearby-travelers" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="route-planner" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="navigation" options={{ animation: 'fade' }} />
+                  <Stack.Screen name="my-trips" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="emergency-contacts" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="privacy" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="help" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="old-notifications" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="conversation/[id]" options={{ animation: 'slide_from_right' }} />
+                </Stack>
+              </UserProfileProvider>
+            </TabBarVisibilityProvider>
           </NotificationsProvider>
         </TravelersProvider>
       </SafeAreaProvider>

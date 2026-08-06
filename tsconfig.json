@@ -27,6 +27,9 @@
       ],
       "@navigation/*": [
         "./navigation/*"
+      ],
+      "@contexts/*": [
+        "./contexts/*"
       ]
     }
   },

@@ -6,7 +6,8 @@ import { ThemedText } from '@components/ui/Typography';
 import { ThemeToggleButton } from '@components/profile/ThemeToggleButton';
 // import ProfileBackground from '../assets/images/profile-bg.png';
 import { Image, ActivityIndicator } from 'react-native';
-import { useProfileImage } from '@hooks/useProfileImage';
+// import { useProfileImage } from '@hooks/useProfileImage';
+import { useUserProfile } from '@contexts/UserProfileContext';
 import { ProfilePhotoActionSheet } from '@components/profile/ProfilePhotoActionSheet';
 
 const C = {
@@ -287,14 +288,16 @@ export function ProfileScreen({
   const [isDark, setIsDark] = useState(false); // UI toggle only — no real theme switch yet
 
   const {
-    imageUri,
-    isSaving,
+    name,
+    email,
+    profileImage,
+    isImageSaving,
     error,
     takePhoto,
     chooseFromGallery,
     removePhoto,
     clearError,
-  } = useProfileImage();
+  } = useUserProfile();
 
   const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
 
@@ -330,9 +333,9 @@ export function ProfileScreen({
             style={styles.avatarWrap}
           >
             <View style={styles.avatar}>
-              {imageUri ? (
+              {profileImage ? (
                 <Image
-                  source={{ uri: imageUri }}
+                  source={{ uri: profileImage }}
                   style={{
                     width: 96,
                     height: 96,
@@ -343,7 +346,7 @@ export function ProfileScreen({
                 <UserIcon />
               )}
 
-              {isSaving && (
+              {isImageSaving  && (
                 <ActivityIndicator
                   size="small"
                   color="#FFFFFF"
@@ -359,10 +362,10 @@ export function ProfileScreen({
             </View>
           </Pressable>
           <ThemedText variant="title" color={C.textPrimary} style={{ fontWeight: '800', marginTop: 12 }}>
-            {USER.name}
+            {name}
           </ThemedText>
           <ThemedText variant="bodySm" color={C.textMuted}>
-            {USER.email}
+            {email}
           </ThemedText>
         </View>
 
@@ -445,9 +448,9 @@ export function ProfileScreen({
       <ProfilePhotoActionSheet
         visible={photoSheetVisible}
         onClose={() => setPhotoSheetVisible(false)}
-        hasPhoto={!!imageUri}
-        imageUri={imageUri}
-        isSaving={isSaving}
+        hasPhoto={!!profileImage}
+        imageUri={profileImage}
+        isSaving={isImageSaving}
         onTakePhoto={takePhoto}
         onChooseFromGallery={chooseFromGallery}
         onRemovePhoto={removePhoto}
