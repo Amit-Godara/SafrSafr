@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Pressable, StyleSheet, Modal, ImageBackground, Image } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet, Modal, ImageBackground} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle, Rect } from 'react-native-svg';
 import { ThemedText } from '@components/ui/Typography';
 import { ThemeToggleButton } from '@components/profile/ThemeToggleButton';
 // import ProfileBackground from '../assets/images/profile-bg.png';
+import { Image, ActivityIndicator } from 'react-native';
+import { useProfileImage } from '@hooks/useProfileImage';
+import { ProfilePhotoActionSheet } from '@components/profile/ProfilePhotoActionSheet';
 
 const C = {
   page: '#F7F8FC',
@@ -283,6 +286,18 @@ export function ProfileScreen({
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isDark, setIsDark] = useState(false); // UI toggle only — no real theme switch yet
 
+  const {
+    imageUri,
+    isSaving,
+    error,
+    takePhoto,
+    chooseFromGallery,
+    removePhoto,
+    clearError,
+  } = useProfileImage();
+
+  const [photoSheetVisible, setPhotoSheetVisible] = useState(false);
+
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
     onLogout?.();
@@ -310,14 +325,39 @@ export function ProfileScreen({
             <ThemeToggleButton isDark={isDark} onToggle={() => setIsDark((d) => !d)} />
           </View>
 
-          <View style={styles.avatarWrap}>
+          <Pressable
+            onPress={() => setPhotoSheetVisible(true)}
+            style={styles.avatarWrap}
+          >
             <View style={styles.avatar}>
-              <UserIcon />
+              {imageUri ? (
+                <Image
+                  source={{ uri: imageUri }}
+                  style={{
+                    width: 96,
+                    height: 96,
+                    borderRadius: 48,
+                  }}
+                />
+              ) : (
+                <UserIcon />
+              )}
+
+              {isSaving && (
+                <ActivityIndicator
+                  size="small"
+                  color="#FFFFFF"
+                  style={{
+                    position: 'absolute',
+                  }}
+                />
+              )}
             </View>
-            <Pressable onPress={onEditPicture} style={styles.cameraBadge}>
+
+            <View style={styles.cameraBadge}>
               <CameraIcon />
-            </Pressable>
-          </View>
+            </View>
+          </Pressable>
           <ThemedText variant="title" color={C.textPrimary} style={{ fontWeight: '800', marginTop: 12 }}>
             {USER.name}
           </ThemedText>
@@ -402,6 +442,16 @@ export function ProfileScreen({
         </Pressable>
       </Modal>
       </View>
+      <ProfilePhotoActionSheet
+        visible={photoSheetVisible}
+        onClose={() => setPhotoSheetVisible(false)}
+        hasPhoto={!!imageUri}
+        imageUri={imageUri}
+        isSaving={isSaving}
+        onTakePhoto={takePhoto}
+        onChooseFromGallery={chooseFromGallery}
+        onRemovePhoto={removePhoto}
+      />
     </ImageBackground>
   );
 }

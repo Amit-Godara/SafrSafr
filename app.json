@@ -29,9 +29,14 @@
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": ["expo-router", "expo-font"],
-    "experiments": {
-      "typedRoutes": true
+   "plugins": [
+  [
+    "expo-image-picker",
+    {
+      "photosPermission": "Allow SafeSafar to access your photos to set a profile picture.",
+      "cameraPermission": "Allow SafeSafar to access your camera to take a profile picture."
     }
+  ]
+]
   }
 }
