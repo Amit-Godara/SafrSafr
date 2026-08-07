@@ -11,6 +11,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { ThemedText } from '@components/ui/Typography';
+import { useAppLock } from '@contexts/AppLockContext';
 
 const C = {
   page: '#F7F8FC',
@@ -295,9 +296,17 @@ export interface PrivacyScreenProps {
 export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) {
   const insets = useSafeAreaInsets();
 
-  const [appLock, setAppLock] = useState(false);
-  const [pin, setPin] = useState('');
-  const [biometric, setBiometric] = useState(true);
+  const {
+    appLockEnabled,
+    biometricEnabled,
+    toggleAppLock,
+    toggleBiometric,
+    savePin,
+    error,
+    clearError,
+  } = useAppLock();
+  const [pinInput, setPinInput] = useState('');
+  const [pinFeedback, setPinFeedback] = useState<string | null>(null);
   const [locationPrivacy, setLocationPrivacy] = useState('While Using App');
   const [dataSharing, setDataSharing] = useState(true);
   const [blocked, setBlocked] = useState<BlockedUser[]>(INITIAL_BLOCKED);
@@ -346,17 +355,20 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
                     Require a PIN to open the app
                   </ThemedText>
                 </View>
-                <Toggle value={appLock} onChange={setAppLock} />
+                <Toggle
+                  value={appLockEnabled}
+                  onChange={toggleAppLock}
+                />
               </View>
-              {appLock && (
+              {appLockEnabled && (
                 <View style={styles.expandBody}>
                   <View style={{ gap: 6 }}>
                     <ThemedText variant="caption" color={C.textSecondary} style={{ fontWeight: '700' }}>
                       Set a 4-digit PIN
                     </ThemedText>
                     <TextInput
-                      value={pin}
-                      onChangeText={(t) => setPin(t.replace(/\D/g, '').slice(0, 4))}
+                      value={pinInput}
+                      onChangeText={(t) => setPinInput(t.replace(/\D/g, '').slice(0, 4))}
                       keyboardType="number-pad"
                       secureTextEntry
                       maxLength={4}
@@ -364,12 +376,34 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
                       placeholderTextColor={C.textMuted}
                       style={styles.input}
                     />
-                    <PressFeedback style={[styles.saveBtn, { marginTop: 8 }]}>
+                    <PressFeedback
+                      onPress={async () => {
+                        try {
+                          await savePin(pinInput);
+                          setPinFeedback('PIN saved successfully.');
+                          setPinInput('');
+                        } catch (e) {
+                          setPinFeedback(
+                            e instanceof Error ? e.message : 'Failed to save PIN.'
+                          );
+                        }
+                      }}
+                      style={[styles.saveBtn, { marginTop: 8 }]}
+                    >
                       <CheckIcon />
                       <ThemedText variant="caption" color="#FFFFFF" style={{ fontWeight: '700' }}>
                         Save PIN
                       </ThemedText>
                     </PressFeedback>
+                    {pinFeedback && (
+                      <ThemedText
+                        variant="caption"
+                        color={pinFeedback.includes('success') ? '#16A34A' : C.danger}
+                        style={{ marginTop: 6 }}
+                      >
+                        {pinFeedback}
+                      </ThemedText>
+                    )}
                   </View>
                 </View>
               )}
@@ -387,7 +421,16 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
                   Use Face ID / Fingerprint to unlock
                 </ThemedText>
               </View>
-              <Toggle value={biometric} onChange={setBiometric} />
+              <Toggle value={biometricEnabled} onChange={toggleBiometric} />
+              {error && (
+                <ThemedText
+                  variant="caption"
+                  color={C.danger}
+                  style={{ marginTop: 4 }}
+                >
+                  {error}
+                </ThemedText>
+              )}
             </View>
           </View>
         </Reveal>

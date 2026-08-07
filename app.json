@@ -13,10 +13,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#0F172A"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.safesafr.app"
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Allow SafeSafar to use Face ID to unlock the app."
+      }
     },
     "android": {
       "package": "com.safesafr.app",
@@ -29,14 +32,15 @@
       "bundler": "metro",
       "output": "static"
     },
-   "plugins": [
-  [
-    "expo-image-picker",
-    {
-      "photosPermission": "Allow SafeSafar to access your photos to set a profile picture.",
-      "cameraPermission": "Allow SafeSafar to access your camera to take a profile picture."
-    }
-  ]
-]
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SafeSafar to access your photos to set a profile picture.",
+          "cameraPermission": "Allow SafeSafar to access your camera to take a profile picture."
+        }
+      ],
+      "expo-secure-store"
+    ]
   }
 }
