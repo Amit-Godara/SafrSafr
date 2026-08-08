@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Pressable, StyleSheet } from 'react-native';
+import { View, ScrollView, Pressable, StyleSheet,Image } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path, Circle as SvgCircle } from 'react-native-svg';
@@ -519,7 +519,14 @@ export function HomeScreen({
           <View style={styles.headerRow}>
             <View style={styles.brandRow}>
               <View style={styles.brandIcon}>
-                <ShieldCheckIcon size={20} />
+                <Image
+                  source={require('../assets/images/logo.png')}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    resizeMode: 'contain',
+                  }}
+                />
               </View>
               <ThemedText variant="title" color={C.textPrimary} style={styles.brandText}>
                 Amit
