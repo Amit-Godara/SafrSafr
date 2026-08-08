@@ -24,6 +24,7 @@ export interface AppLockContextValue {
   toggleBiometric: (enabled: boolean) => Promise<void>;
   savePin: (pin: string) => Promise<void>;
   verifyPin: (pin: string) => Promise<boolean>;
+  changePin: (currentPin: string, newPin: string) => Promise<void>;
   attemptBiometricUnlock: () => Promise<boolean>;
   clearError: () => void;
 }
@@ -129,6 +130,22 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     return ok;
   }, []);
 
+  /**
+   * changePin — used by the Privacy screen's "Change PIN" flow. Verifies
+   * the current PIN directly against the store (verifyPinInStore, not
+   * this context's verifyPin) so it never touches isLocked/error, which
+   * belong to the lock overlay flow, not this settings flow. Throws with
+   * a readable message on any failure — the caller (ChangePinModal)
+   * displays it locally.
+   */
+  const changePin = useCallback(async (currentPin: string, newPin: string) => {
+    const isCurrentCorrect = await verifyPinInStore(currentPin);
+    if (!isCurrentCorrect) {
+      throw new Error('Current PIN is incorrect.');
+    }
+    await savePinToStore(newPin); // throws with a readable message on invalid format
+  }, []);
+
   const attemptBiometricUnlock = useCallback(async () => {
     if (!biometricEnabled || !biometricAvailable) return false;
     const success = await authenticateWithBiometrics();
@@ -153,6 +170,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     toggleBiometric,
     savePin,
     verifyPin,
+    changePin,
     attemptBiometricUnlock,
     clearError,
   };

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Pressable, TextInput, StyleSheet , ImageBackground } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle, Rect } from 'react-native-svg';
+import { ChangePinModal } from '@components/lock/ChangePinModal';
+
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -299,12 +301,15 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
   const {
     appLockEnabled,
     biometricEnabled,
+    hasPinSet,
     toggleAppLock,
     toggleBiometric,
     savePin,
+    changePin,
     error,
     clearError,
   } = useAppLock();
+  const [changePinVisible, setChangePinVisible] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinFeedback, setPinFeedback] = useState<string | null>(null);
   const [locationPrivacy, setLocationPrivacy] = useState('While Using App');
@@ -403,6 +408,20 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
                       >
                         {pinFeedback}
                       </ThemedText>
+                    )}
+                    {hasPinSet && (
+                      <Pressable
+                        onPress={() => setChangePinVisible(true)}
+                        style={[styles.cancelBtn, { marginTop: 10 }]}
+                      >
+                        <ThemedText
+                          variant="caption"
+                          color={C.primary}
+                          style={{ fontWeight: '700' }}
+                        >
+                          Change PIN
+                        </ThemedText>
+                      </Pressable>
                     )}
                   </View>
                 </View>
@@ -609,7 +628,11 @@ export function PrivacyScreen({ onBack, onAccountDeleted }: PrivacyScreenProps) 
             )}
           </View>
         </Reveal>
-      </ScrollView>
+      </ScrollView> 
+      <ChangePinModal
+        visible={changePinVisible}
+        onClose={() => setChangePinVisible(false)}
+      />
     </View>
       </ImageBackground>
   );
