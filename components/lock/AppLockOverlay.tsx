@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path, Circle as SvgCircle } from 'react-native-svg';
 import { ThemedText } from '@components/ui/Typography';
 import { useAppLock } from '@contexts/AppLockContext';
+import { ForgotPinModal } from '@components/lock/ForgotPinModal';
 
 const C = {
   bg: '#101828',
@@ -65,6 +66,7 @@ export function AppLockOverlay() {
     useAppLock();
   const [pin, setPin] = useState('');
   const [shake, setShake] = useState(false);
+  const [forgotPinVisible, setForgotPinVisible] = useState(false);
 
   useEffect(() => {
     if (isLocked && biometricEnabled && biometricAvailable) {
@@ -146,6 +148,14 @@ export function AppLockOverlay() {
           </ThemedText>
         </Pressable>
       )}
+
+      <Pressable onPress={() => setForgotPinVisible(true)} style={styles.forgotBtn}>
+        <ThemedText variant="caption" color={C.textMuted} style={{ fontWeight: '600' }}>
+          Forgot PIN?
+        </ThemedText>
+      </Pressable>
+
+      <ForgotPinModal visible={forgotPinVisible} onClose={() => setForgotPinVisible(false)} />
     </View>
   );
 }
@@ -166,6 +176,7 @@ const styles = StyleSheet.create({
   },
   key: { width: 88, height: 72, alignItems: 'center', justifyContent: 'center' },
   biometricBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 20 },
+  forgotBtn: { marginTop: 18, paddingVertical: 6 },
 });
 
 export default AppLockOverlay;

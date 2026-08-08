@@ -25,6 +25,7 @@ export interface AppLockContextValue {
   savePin: (pin: string) => Promise<void>;
   verifyPin: (pin: string) => Promise<boolean>;
   changePin: (currentPin: string, newPin: string) => Promise<void>;
+  resetPin: (newPin: string) => Promise<void>;
   attemptBiometricUnlock: () => Promise<boolean>;
   clearError: () => void;
 }
@@ -146,6 +147,20 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     await savePinToStore(newPin); // throws with a readable message on invalid format
   }, []);
 
+  /**
+   * resetPin — used by the "Forgot PIN?" flow, after OTP verification
+   * has already confirmed the user's identity. Unlike changePin, there's
+   * no current PIN to check here by design (that's the whole point of
+   * "forgot"). Also unlocks the app on success, since this is invoked
+   * from the lock screen itself.
+   */
+  const resetPin = useCallback(async (newPin: string) => {
+    await savePinToStore(newPin); // throws with a readable message on invalid format
+    setHasPinSet(true);
+    setIsLocked(false);
+    setError(null);
+  }, []);
+
   const attemptBiometricUnlock = useCallback(async () => {
     if (!biometricEnabled || !biometricAvailable) return false;
     const success = await authenticateWithBiometrics();
@@ -171,6 +186,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     savePin,
     verifyPin,
     changePin,
+    resetPin,
     attemptBiometricUnlock,
     clearError,
   };
